@@ -320,6 +320,18 @@ config SAMPLE_HUNG_TASK
 	  Reading these files with multiple processes triggers hung task
 	  detection by holding locks for a long time (256 seconds).
 
+config SAMPLE_HELLO_CHINESE
+	tristate "Build Chinese greeting example -- loadable modules only"
+	depends on m
+	help
+	  Build a sample module that prints a Chinese greeting ("你好")
+	  when loaded and a Chinese farewell ("再见") when unloaded.
+
+	  To compile this as a module, choose M here:
+	  the module will be called hello_chinese.
+
+	  If unsure, say N.
+
 source "samples/rust/Kconfig"
 
 source "samples/damon/Kconfig"
