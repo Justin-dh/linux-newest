@@ -146,7 +146,7 @@ static int squashfs_bio_read_cached(struct bio *fullbio,
 	}
 
 	if (err)
-		return err;
+		goto out;
 
 	if (head_to_cache) {
 		int ret = filemap_add_folio(cache_mapping, head_to_cache,
@@ -172,25 +172,28 @@ static int squashfs_bio_read_cached(struct bio *fullbio,
 	}
 
 #ifdef CONFIG_SQUASHFS_COMP_CACHE_FULL
-	if (!cache_folios)
-		goto out;
+	if (cache_folios) {
+		for (idx = 0; idx < page_count; idx++) {
+			int ret;
 
-	for (idx = 0; idx < page_count; idx++) {
-		if (!cache_folios[idx])
-			continue;
-		int ret = filemap_add_folio(cache_mapping, cache_folios[idx],
-						(read_start >> PAGE_SHIFT) + idx,
-						GFP_NOIO);
+			if (!cache_folios[idx])
+				continue;
+			ret = filemap_add_folio(cache_mapping, cache_folios[idx],
+							(read_start >> PAGE_SHIFT) + idx,
+							GFP_NOIO);
 
-		if (!ret) {
-			folio_mark_uptodate(cache_folios[idx]);
-			folio_unlock(cache_folios[idx]);
+			if (!ret) {
+				folio_mark_uptodate(cache_folios[idx]);
+				folio_unlock(cache_folios[idx]);
+			}
 		}
 	}
+out:
 	kfree(cache_folios);
+#else
 out:
 #endif
-	return 0;
+	return err;
 }
 
 static struct page *squashfs_get_cache_page(struct address_space *mapping,

@@ -189,7 +189,7 @@ static blk_status_t ubiblock_read(struct request *req)
 	int leb = pos;
 	struct req_iterator iter;
 	struct bio_vec bvec;
-	int ret;
+	int ret = 0;
 
 	blk_mq_start_request(req);
 
@@ -394,7 +394,6 @@ int ubiblock_create(struct ubi_volume_info *vi)
 			dev->ubi_num, dev->vol_id);
 		goto out_free_dev;
 	}
-
 
 	/* Initialize the gendisk of this ubiblock device */
 	gd = blk_mq_alloc_disk(&dev->tag_set, &lim, dev);
